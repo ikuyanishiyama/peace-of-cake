@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piece of Cake</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 10px;
+    }
+    h2 {
+      margin-bottom: 10px;
+      font-size: 1.5em;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      background: white;
+    }
+    .controls {
+      margin-top: 15px;
+    }
+    button {
+      font-size: 1em;
+      margin: 5px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #e0e0e0;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #d0d0d0;
+    }
+    input[type="file"] {
+      font-size: 1em;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Piece of Cake - ケーキを美しく等分しよう</h2>
+  <input type="file" id="imageLoader" name="imageLoader" accept="image/*">
+  <br><br>
+  <canvas id="cakeCanvas" width="500" height="500"></canvas>
+  <div class="controls">
+    <div>
+      分割数:
+      <button onclick="changeSlices(-1)">－</button>
+      <span id="sliceCount">6</span>
+      <button onclick="changeSlices(1)">＋</button>
+    </div>
+    <div>
+      中心位置調整:<br>
+      <button onclick="moveCenter(0,-5)">↑</button><br>
+      <button onclick="moveCenter(-5,0)">←</button>
+      <button onclick="moveCenter(5,0)">→</button><br>
+      <button onclick="moveCenter(0,5)">↓</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('cakeCanvas');
+    const ctx = canvas.getContext('2d');
+    const imageLoader = document.getElementById('imageLoader');
+    const sliceCountDisplay = document.getElementById('sliceCount');
+
+    let image = new Image();
+    let slices = 6;
+    let centerX = canvas.width / 2;
+    let centerY = canvas.height / 2;
+
+    function drawImageAndLines() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = 1.0;
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < slices; i++) {
+        const angle = (i * 2 * Math.PI) / slices;
+        const x = centerX + 300 * Math.cos(angle);
+        const y = centerY + 300 * Math.sin(angle);
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    function changeSlices(delta) {
+      slices = Math.max(1, slices + delta);
+      sliceCountDisplay.textContent = slices;
+      drawImageAndLines();
+    }
+
+    function moveCenter(dx, dy) {
+      centerX += dx;
+      centerY += dy;
+      drawImageAndLines();
+    }
+
+    imageLoader.addEventListener('change', function (e) {
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        image.onload = function () {
+          drawImageAndLines();
+        };
+        image.src = event.target.result;
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }, false);
+  </script>
+</body>
+</html>
